@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import Header from "./Header";
 import { checkValidData } from "../utils/validate";
-import { createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import {auth} from "../utils/firebase";
 const Login = () => {
 
@@ -9,6 +9,7 @@ const [isSignInForm, setIsSignInForm] = useState(true);
 const [errorMessage, setErrorMessage] = useState(null);
 
 const email = useRef(null);
+
 const password = useRef(null);
 const handleButtonClick = () =>{
   // Validate the form data
@@ -17,22 +18,37 @@ const handleButtonClick = () =>{
   if(message) return;
 
   //sign in sign up logic
+
   if(!isSignInForm){
     //Sign up logic
-    createUserWithEmailAndPassword(auth, email, password)
+    createUserWithEmailAndPassword(auth, email.current.value,password.current.value)
   .then((userCredential) => {
     // Signed up 
     const user = userCredential.user;
-    // ...
+    console.log(user);
   })
   .catch((error) => {
     const errorCode = error.code;
     const errorMessage = error.message;
-    // ..
+    setErrorMessage(errorCode + " " + errorMessage);
   });
 
   }else{
+
     //Sign In logic
+
+    signInWithEmailAndPassword(auth,email.current.value,password.current.value )
+    .then((userCredential) => {
+      // Signed in 
+      const user = userCredential.user;
+      console.log(user);
+      
+    })
+    .catch((error) => {
+      const errorCode = error.code;
+      const errorMessage = error.message;
+      setErrorMessage(errorCode + "_" + errorMessage)
+    });
   }
   
 };
@@ -63,12 +79,7 @@ const toggleSignInForm = () =>{
 
         <input  ref={password} type="password" placeholder="Password" className="p-2 my-4 w-full bg-gray-800 rounded-sm bg-opacity-60 border-2 border-gray-600"/>
 
-
        <p className="text-rose-500 font-bold text-lg py-2">{errorMessage}</p>
-
-        {!isSignInForm && (
-          <input type="password" placeholder="Confirm Password" className="p-2 my-4 w-full bg-gray-800 rounded-sm bg-opacity-60 border-2 border-gray-600"/>
-        )}
 
         <button className="p-2 my-8 bg-red-700 w-full rounded-md cursor-pointer" onClick={handleButtonClick}>{isSignInForm ? 'Sign In' : 'Sign Up'}</button>
 
