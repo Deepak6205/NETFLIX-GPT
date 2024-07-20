@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import Header from "./Header";
 import { checkValidData } from "../utils/validate";
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from "firebase/auth";
 import {auth} from "../utils/firebase";
 import { useNavigate } from "react-router-dom";
 const Login = () => {
@@ -10,6 +10,7 @@ const [isSignInForm, setIsSignInForm] = useState(true);
 const [errorMessage, setErrorMessage] = useState(null);
 const navigate = useNavigate();
 
+const name = useRef(null);
 const email = useRef(null);
 const password = useRef(null);
 
@@ -25,10 +26,17 @@ const handleButtonClick = () =>{
     //Sign up logic
     createUserWithEmailAndPassword(auth, email.current.value,password.current.value)
   .then((userCredential) => {
-    // Signed up 
+    
     const user = userCredential.user;
-    console.log(user);
-    navigate('/');
+    
+    updateProfile(user, {
+      displayName: name.current.value, photoURL: "https://example.com/jane-q-user/profile.jpg"
+    }).then(() => {
+      navigate('/browse');
+    }).catch((error) => {
+      setErrorMessage(error.message);
+      
+    });
   })
   .catch((error) => {
     const errorCode = error.code;
@@ -76,7 +84,7 @@ const toggleSignInForm = () =>{
         <h1 className="font-bold text-3xl py-4">{isSignInForm ? 'Sign In' : 'Sign Up'}</h1>
 
         {!isSignInForm && (
-          <input type="text" placeholder="Full Name" className="p-2 my-4 w-full bg-gray-800 rounded-sm bg-opacity-60 border-2 border-gray-600 "/>
+          <input ref={name} type="text" placeholder="Full Name" className="p-2 my-4 w-full bg-gray-800 rounded-sm bg-opacity-60 border-2 border-gray-600 "/>
         )}
 
         <input ref={email} type="text" placeholder="Email Address" className="p-2 my-4 w-full bg-gray-800 rounded-sm bg-opacity-60 border-2 border-gray-600 "/>
