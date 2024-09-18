@@ -1,24 +1,69 @@
 import React, { useState, useRef } from "react";
 import { Header } from "./Header";
 import { checkValidData } from "../utils/validate";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../utils/firebase";
+import { useNavigate } from "react-router-dom";
+
 export const Login = () => {
   const [isSignInForm, setIsSignInForm] = useState(true);
-  const [errorMessage,setErrorMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null);
+
+  const navigate = useNavigate();
   const email = useRef(null);
   const password = useRef(null);
-  const handleButtonClick = ()=>{
-    
+  const handleButtonClick = () => {
     // by doing this we will get the reference of whole email,password input field karke dekh lo
 
-        // console.log(email) 
-        // console.log(password) 
+    // console.log(email)
+    // console.log(password)
     // by doing this we will get only the required thing
-    console.log(email.current.value) 
-    console.log(password.current.value)
+    console.log(email.current.value);
+    console.log(password.current.value);
 
-     const message = checkValidData(email.current.value,password.current.value);
-     setErrorMessage(message);
-  }
+    const message = checkValidData(email.current.value, password.current.value);
+    setErrorMessage(message);
+    //means koi string value present hai i.e email ya password valid nahi hai to yahi pe return kar do aage proceed mat ho
+    if (message) return;
+
+    // else sab sahi hai to proceed karo sign in / sign up ke liye
+
+    if (!isSignInForm) {
+      // that means sign up karo
+
+      createUserWithEmailAndPassword(
+        auth,
+        email.current.value,
+        password.current.value
+      )
+        .then((userCredential) => {
+          const user = userCredential.user;
+          console.log(user);
+          navigate("/browse");
+        })
+        .catch((error) => {
+          const errorCode = error.code;
+          const errorMessage = error.message;
+          setErrorMessage(errorCode+"_"+errorMessage);
+        });
+    } else {
+      //sign in kro
+
+  signInWithEmailAndPassword(auth,email.current.value,
+    password.current.value )
+  .then((userCredential) => {
+    // Signed in 
+    const user = userCredential.user;
+    console.log(user)
+    navigate("/browse");
+  })
+  .catch((error) => {
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    setErrorMessage(errorCode+"_"+errorMessage);
+  });
+    }
+  };
 
   const togleSignInForm = () => {
     setIsSignInForm(!isSignInForm);
@@ -32,26 +77,31 @@ export const Login = () => {
           alt="bg-img"
         />
       </div>
-      <form onSubmit={(e)=>e.preventDefault()} className="absolute bg-black p-12 my-36 mx-auto right-0 left-0 w-3/12 text-white bg-opacity-85 rounded-lg">
+      <form
+        onSubmit={(e) => e.preventDefault()}
+        className="absolute bg-black p-12 my-36 mx-auto right-0 left-0 w-3/12 text-white bg-opacity-85 rounded-lg"
+      >
         <h1 className="font-bold text-3xl py-4">
           {isSignInForm ? "Sign In" : "Sign Up"}
         </h1>
-        {!isSignInForm && <input
-          type="text"
-          placeholder="Full Name"
-          className="my-2 w-full
+        {!isSignInForm && (
+          <input
+            type="text"
+            placeholder="Full Name"
+            className="my-2 w-full
        py-4 bg-zinc-800 rounded-lg p-4"
-        />}
+          />
+        )}
         <input
-        ref={email}
+          ref={email}
           type="email"
           placeholder="Email Address"
           className="my-2 w-full
        py-4 bg-zinc-800 rounded-lg p-4"
         />
-        
+
         <input
-        ref={password}
+          ref={password}
           type="password"
           placeholder="Password"
           className="rounded-lg my-2 w-full py-4 p-4 bg-zinc-800"
@@ -59,7 +109,8 @@ export const Login = () => {
         <p className="text-red-600">{errorMessage}</p>
         <button
           type="submit"
-          className=" my-6 w-full bg-red-700 py-4 rounded-lg" onClick={handleButtonClick}
+          className=" my-6 w-full bg-red-700 py-4 rounded-lg"
+          onClick={handleButtonClick}
         >
           {isSignInForm ? "Sign In" : "Sign Up"}
         </button>
