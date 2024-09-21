@@ -5,6 +5,10 @@
 /.pnp
 .pnp.js
 
+#Authentication
+utils/Constants.js
+
+
 # testing
 /coverage
 
