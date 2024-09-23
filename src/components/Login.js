@@ -25,8 +25,8 @@ export const Login = () => {
     // console.log(email)
     // console.log(password)
     // by doing this we will get only the required thing
-    console.log(email.current.value);
-    console.log(password.current.value);
+    //console.log(email.current.value);
+    //console.log(password.current.value);
 
     const message = checkValidData(email.current.value, password.current.value);
     setErrorMessage(message);
