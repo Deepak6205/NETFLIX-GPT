@@ -4,12 +4,16 @@ import { auth } from "../utils/firebase";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addUser, removeUser } from "../utils/userSlice";
-import { LOGO } from "../utils/Constants";
+import { LOGO, SUPPORTED_LANGUAGES } from "../utils/Constants";
+import { toggleGptSearchView } from "../utils/GptSlice";
+
+import { changeLanguage } from "../utils/configSlice";
 
 export const Header = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector((store) => store.user);
+  const showGptSearch = useSelector((store)=> store.gpt.showGptSearch);
   const handleSignOut = () => {
     signOut(auth)
       .then(() => {})
@@ -42,17 +46,35 @@ export const Header = () => {
     return () => unsubscribe();
   }, []);
 
+  //Toggle GPT Search
+  const handleGptSearchClick = () => {
+    dispatch(toggleGptSearchView());
+  };
+
+  const handleLanguageChange = (e) =>{
+    dispatch(changeLanguage(e.target.value));
+  }
+
   return (
     <div className="absolute z-10 w-screen px-8 py-2 bg-gradient-to-b from-black flex justify-between">
-      <img
-        className="w-44"
-        src={LOGO}
-        alt="logo"
-      />
+      <img className="w-44" src={LOGO} alt="logo" />
       {user && (
         <div className="flex p-2">
+         {showGptSearch && <select className="p-2 bg-purple-600 text-white m-2 border-none cursor-pointer" onChange={handleLanguageChange}>
+            {SUPPORTED_LANGUAGES.map((lang) => (
+              <option key={lang.identifier} value={lang.identifier}>
+                {lang.name}
+              </option>
+            ))}
+          </select>}
+          <button
+            onClick={handleGptSearchClick}
+            className="bg-pink-700 text-white px-4  mx-6 my-2 py-2 rounded-sm"
+          >
+           {showGptSearch ? "HOMEPAGE" : "GPT SEARCH"}
+          </button>
           <img
-            className="w-10 h-10 rounded-md"
+            className="w-11 h-12 rounded-sm"
             src={user.photoURL}
             alt="userLogo"
           />
